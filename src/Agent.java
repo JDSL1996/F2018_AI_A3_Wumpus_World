@@ -1,20 +1,19 @@
-import java.util.Hashtable;
-import java.util.LinkedList;
-import java.util.Stack;
+import java.util.*;
 
 public class Agent {
     private Report report = new Report();
     private Cave cave;
-    private int[] standing;
+    private List<Integer> standing = new ArrayList<>(2);
     private boolean dead,finished = false;
     //n,e,s,w
     private int[][] directions = {{0,1}, {1,0}, {0,-1}, {-1,0}};
-    private LinkedList<int[]> path = new LinkedList<>();
+    private LinkedList<List<Integer>> path = new LinkedList<>();
 
     //Done: can enter cave
     void enterCave(Cave cave){
         this.cave = cave;
-        standing = new int[]{1,1};
+        standing.add(1);
+        standing.add(1);
 
 
         int test = 5;
@@ -40,92 +39,101 @@ public class Agent {
             boolean ignore = false;
             switch (attribute.toString()) {
                 case "Glitter":
-                    report.addLog("So close I can almost taste it! ", standing);
+                    report.addLog("So close I can almost taste it! ", attribute.toString(), standing);
                     break;
                 case "Smell":
-                    report.addLog("Smells funny here. ", standing);
+                    report.addLog("Smells funny here. ", attribute.toString(), standing);
                     break;
                 case "Breeze":
-                    report.addLog("Do you feel that? ", standing);
+                    report.addLog("Do you feel that? ", attribute.toString(), standing);
                     break;
                 case "Wumpus":
-                    report.addLog("Shit. ", standing);
+                    report.addLog("Shit. ", attribute.toString(), standing);
                     dead = true;
                     break;
                 case "Pit":
-                    report.addLog("YAAAAAH-WHO-WHO-WHOEY! ", standing);
+                    report.addLog("YAAAAAH-WHO-WHO-WHOEY! ", attribute.toString(), standing);
                     dead = true;
                     break;
                 case "Gold":
-                    report.addLog("Oh, there you are! ", standing);
+                    report.addLog("Oh, there you are! ", attribute.toString(), standing);
                     getGoldgoHome();
                     break;
                 case "A":
-                case "":
                 case "X":
                     ignore = true;
                     break;
                 default:
-                    report.addLog("Man, it's really dark in here. Hope this is legible. ", standing);
+                    report.addLog("Man, it's really dark in here. Hope this is legible. ", attribute.toString(), standing);
                     break;
             }
             if (!ignore) {
-                report.checkLog(standing);
+                report.readLastEntry();
             }
         }
 
-        //TODO: might loop around a space and get trapped, find a way to fix (visited every node in surrounding area)
-        //TODO: make the hashtable actually work so its better, for now just going to use the stack which is bad
+        //TODO: choice order: not die, get gold
+        //possible conditions: nothing, gold, pit, wumpus, gold and pit, gold and wumpus, pit and wumpus
+
+
+        //if glitter
+//        if(cave.getAttribute(standing).equals(""))
+
         //if found glitter + move has no glitter -> going the wrong way
         //if not enough clues move random
         //if danger clue is removed upon move -> going the right way
         //if smell -> not smell: wumpus has to be around the smell
+
+        //TODO: might loop around a space and get trapped, find a way to fix (visited every node in surrounding area)
+        ////if not enough information, test direction array until a choice can be made
         boolean choice = false;
-//        while (!choice && !dead && !finished) {
-            //if not enough information, move a random direction
-//            int turn = (int) (Math.random() * (directions.length - 1));
-//            int[] step = {standing[0] + directions[turn][0], standing[1] + directions[turn][1]};
+        List<Integer> step = new ArrayList<>(2);
+        if(!finished && !dead) {
+            for (int turn = 0; turn < directions.length; turn++) {
+                step.clear();
 
+                step.add(standing.get(0) + directions[turn][0]);
+                step.add(standing.get(1) + directions[turn][1]);
 
-            //uses the actual array pointer not the values so always evaluates to false
-            //TODO: fix that
-            int[] step = {1,1};
-            standing = step;
-            report.addLog("test", standing);
-            int[] step1 = {1,1};
-            System.out.println(report.log.containsKey(step));
-
-            if (!cave.wall(step)) {
-                if (!path.contains(step)) {
-                    standing = step;
-                    cave.agentCurrent(standing, path.peek());
-                    cave.revealCaveFull();
-                    choice = true;
+                if (!cave.wall(step)) {
+                    if (!report.visited(step)) {
+                        standing = step;
+                        choice = true;
+                        //choice made so break
+                        turn = directions.length;
+                    }
                 }
             }
-//        }
-    }
-
-    private Hashtable recall(int[] location){
-        Hashtable<int[],String> surroundings = new Hashtable<>();
-
-        for(int[] direction: directions){
-            int[] space = {location[0] + direction[0], location[1] + direction[1]};
-            String look = report.checkLog(space);
-            if(look != null) {
-                surroundings.put(space, look);
+            if (!choice) {
+                System.out.println("IDK what to do!");
+                finished = true;
             }
         }
-
-        return surroundings;
+        //update and show path for testing########################################################################
+        cave.agentCurrent(standing, path.peek());
+        cave.revealCaveFull();
     }
+
+//    private Hashtable recall(int[] location){
+//        Hashtable<int[],String> surroundings = new Hashtable<>();
+//
+//        for(int[] direction: directions){
+//            int[] space = {location[0] + direction[0], location[1] + direction[1]};
+//            String look = report.checkLog(space);
+//            if(look != null) {
+//                surroundings.put(space, look);
+//            }
+//        }
+//
+//        return surroundings;
+//    }
 
     //TODO: can hold gold
     private void getGoldgoHome(){
         finished = true;
-        while(!path.isEmpty()){
-            standing = path.pop();
-        }
+//        while(!path.isEmpty()){
+//            path.pop();
+//        }
     }
 
     //agent sends in report

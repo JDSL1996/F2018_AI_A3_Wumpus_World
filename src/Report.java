@@ -1,22 +1,28 @@
 import java.util.Hashtable;
 import java.util.LinkedList;
+import java.util.List;
 
 public class Report {
     //TODO: make and print cave results in an intelligent mannor
     private String caveResult;
-    public Hashtable<int[], String> log = new Hashtable<>();
+    //need to not use array as key as hash value changes per array not per contents
+    private Hashtable<List, String> log = new Hashtable<>();
     private LinkedList<String> logPrint = new LinkedList<>();
     private String[] possibleResult = new String[]{"Gold", "Dead"};
 
-    void addLog(String event, int[] location){
+    void addLog(String event, String attribute, List location){
         //log the event at a location (assume new location each call)
-        log.put(location, event);
-        logPrint.add("[" + String.valueOf(location[0]) + ", " + String.valueOf(location[1] + "] " + event));
+        log.put(location, attribute);
+        logPrint.add("[" + String.valueOf(location.get(0)) + ", " + String.valueOf(location.get(1) + "] " + event));
     }
-    String checkLog(int[] location){
-        System.out.print("log: " + log.get(location) + "@ ");
-        System.out.println(location[0] + ", " + location[1]);
+    String checkLog(List location){
         return log.get(location);
+    }
+    void readLastEntry(){
+        System.out.println("log: " + logPrint.peekLast());
+    }
+    boolean visited(List location){
+        return log.containsKey(location);
     }
     void printReport(){
         for(Object event: logPrint.toArray()){

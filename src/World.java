@@ -8,9 +8,9 @@ public class World {
 
     private void initializeWorld(){
         Cave c4 = new Cave(4,4);
-//        Cave c5 = new Cave(5,5);
-//        Cave c8 = new Cave(8,8);
-//        Cave c10 = new Cave(10,10);
+        Cave c5 = new Cave(5,5);
+        Cave c8 = new Cave(8,8);
+        Cave c10 = new Cave(10,10);
 
         network[0] = c4;
 //        network[1] = c5;
