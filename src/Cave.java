@@ -140,8 +140,13 @@ public class Cave {
         }
     }
 
-    void trackAgent(int[] location, int[] past){
-        map.get(past[0]).get(past[1]).remove("X");
+    void agentCurrent(int[] location, int[] past){
+        map.get(past[0]).get(past[1]).remove("A");
+        map.get(location[0]).get(location[1]).add("A");
+        agentTrail(past);
+    }
+
+    void agentTrail(int[] location){
         map.get(location[0]).get(location[1]).add("X");
     }
 

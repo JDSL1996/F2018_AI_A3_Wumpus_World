@@ -24,9 +24,9 @@ public class World {
         for (Cave x: network) {
             x.revealCavePretty();
             fred.enterCave(x);
-//            Report report = fred.whatHappened();
-//
-//            report.printReport();
+            Report report = fred.whatHappened();
+
+            report.printReport();
         }
     }
     //TODO: possible total report for world (we lost 2 agents but got 2 bars)
