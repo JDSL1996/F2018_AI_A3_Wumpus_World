@@ -66,26 +66,26 @@ public class Cave {
             }
         }
 
-//        for (int x = 0; x < this.x; x++) {
-//            for (int y = 0; y < this.y; y++) {
-//                if(x == caveEntrance[0] && y == caveEntrance[1])
-//                {
-//                    continue;
-//                }
-//
-//                //Done: each place has 20% chance to be pit
-//                //decimal number between zero and one
-//                float chance = (float)Math.random();
-//
-//                //20% chance of pit placement
-//                //only on empty space
-//                if (chance < 0.2 && map.get(x).get(y).peekFirst().equals("")){
-//                    map.get(x).get(y).pop();
-//                    map.get(x).get(y).push("Pit");
-//                    adjacency("Breeze", new int[]{x, y});
-//                }
-//            }
-//        }
+        for (int x = 0; x < this.x; x++) {
+            for (int y = 0; y < this.y; y++) {
+                if(x == caveEntrance[0] && y == caveEntrance[1])
+                {
+                    continue;
+                }
+
+                //Done: each place has 20% chance to be pit
+                //decimal number between zero and one
+                float chance = (float)Math.random();
+
+                //20% chance of pit placement
+                //only on empty space
+                if (chance < 0.2 && map.get(x).get(y).peekFirst().equals("")){
+                    map.get(x).get(y).pop();
+                    map.get(x).get(y).push("Pit");
+                    adjacency("Breeze", new int[]{x, y});
+                }
+            }
+        }
     }
 
     private void adjacency(String attribute, int[] location){
@@ -165,9 +165,9 @@ public class Cave {
         //complex information heavy print
 
         //compass
-        System.out.println("   S  ");
-        System.out.println("E -|- W");
-        System.out.print("   N  ");
+        System.out.println("   N  ");
+        System.out.println("W -|- E");
+        System.out.print("   S  ");
 
         //print header row
         for (int x = 0; x < this.x; x++) {
@@ -177,9 +177,9 @@ public class Cave {
         System.out.println();
 
         //print cave as table with all values
-        for (int y = 0; y < this.x; y++) {
+        for (int y = this.y-1; y > -1; y--) {
             System.out.print(y);
-            for (int x = 0; x < this.y; x++) {
+            for (int x = 0; x < this.x; x++) {
                 Object[] item = map.get(x).get(y).toArray();
                 System.out.print("(");
                 for (int i = 0; i < 3; i++) {
@@ -202,9 +202,9 @@ public class Cave {
         //prettier user friendly print
 
         //compass
-        System.out.println("   S  ");
-        System.out.println("E -|- W");
         System.out.println("   N  ");
+        System.out.println("W -|- E");
+        System.out.println("   S  ");
 
         //print header row
         for (int x = 0; x < this.x; x++) {
@@ -214,9 +214,9 @@ public class Cave {
         System.out.println();
 
         //print cave as table with important items
-        for (int y = 0; y < this.x; y++) {
+        for (int y = this.y-1; y > -1; y--) {
             System.out.print(y);
-            for (int x = 0; x < this.y; x++) {
+            for (int x = 0; x < this.x; x++) {
                 System.out.print("(");
                 if(map.get(x).get(y).peekFirst().equals("Wumpus") || map.get(x).get(y).peekFirst().equals("Gold") || map.get(x).get(y).peekFirst().equals("Pit")) {
                     System.out.printf("%6s", map.get(x).get(y).peek());

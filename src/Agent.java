@@ -16,8 +16,9 @@ public class Agent {
         standing.add(1);
 
 
+        //TODO:remove test code
         int test = 5;
-        while(!dead && !finished) {//###########################################################################
+        while(!dead && !finished) {
             path.push(standing);
             exploreCave();
             test --;
@@ -109,7 +110,7 @@ public class Agent {
                 finished = true;
             }
         }
-        //update and show path for testing########################################################################
+        ////TODO:remove test code: update and show path for testing
         cave.agentCurrent(standing, path.peek());
         cave.revealCaveFull();
     }
