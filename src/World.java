@@ -1,6 +1,6 @@
 public class World {
     //DONE: make cave network @4,5,8,10
-    private Cave[] network = new Cave[4];
+    private Cave[] network = new Cave[1];
 
     World(){
         initializeWorld();
@@ -8,13 +8,11 @@ public class World {
 
     private void initializeWorld(){
         Cave c4 = new Cave(4,4);
-        Cave c5 = new Cave(5,5);
-        Cave c8 = new Cave(8,8);
-        Cave c10 = new Cave(10,10);
+//        Cave c5 = new Cave(5,5);
+//        Cave c8 = new Cave(8,8);
+//        Cave c10 = new Cave(10,10);
 
         network[0] = c4;
-        c4.revealCaveFull();
-        c4.revealCavePretty();
 //        network[1] = c5;
 //        network[2] = c8;
 //        network[3] = c10;
@@ -23,13 +21,13 @@ public class World {
     //Done: take agent send into cave
     //Done: print a report metric for each cave entered
     void ventureForth(Agent fred){
-//        for (Cave x: network) {
-//            x.revealCave();
-////            fred.enterCave(x);
-////            Report report = fred.whatHappened();
+        for (Cave x: network) {
+            x.revealCavePretty();
+            fred.enterCave(x);
+//            Report report = fred.whatHappened();
 //
-////            report.printReport();
-//        }
+//            report.printReport();
+        }
     }
     //TODO: possible total report for world (we lost 2 agents but got 2 bars)
 }

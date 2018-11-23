@@ -36,14 +36,12 @@ public class Cave {
                 continue;
             }
 
-            if (map.get(x).get(y).peekFirst().equals("")) {
-                map.get(x).get(y).pop();
-                map.get(x).get(y).push("Gold");
+            map.get(x).get(y).pop();
+            map.get(x).get(y).push("Gold");
 
-                adjacency("Glitter", new int[]{x, y});
+            adjacency("Glitter", new int[]{x, y});
 
-                placed = true;
-            }
+            placed = true;
         }
 
         placed = false;
@@ -57,7 +55,7 @@ public class Cave {
                 continue;
             }
 
-            if (map.get(x).get(y).peekFirst().equals("")) {
+            if (!map.get(x).get(y).peekFirst().equals("Gold")) {
                 map.get(x).get(y).pop();
                 map.get(x).get(y).push("Wumpus");
 
@@ -80,7 +78,7 @@ public class Cave {
 
                 //20% chance of pit placement
                 //only on empty space
-                if (chance < 0.2 && !map.get(x).get(y).peekFirst().equals("Wumpus") && !map.get(x).get(y).peekFirst().equals("Gold")){
+                if (chance < 0.2 && map.get(x).get(y).peekFirst().equals("")){
                     map.get(x).get(y).pop();
                     map.get(x).get(y).push("Pit");
                     adjacency("Breeze", new int[]{x, y});
@@ -102,6 +100,7 @@ public class Cave {
             LinkedList east = (LinkedList) map.get(x + 1).get(y).clone();
             if (!east.peekFirst().equals("Wumpus") && !east.peekFirst().equals("Gold") && !east.peekFirst().equals("Pit")) {
                 if(!east.peekFirst().equals(attribute)){
+                    map.get(x + 1).get(y).remove("");
                     map.get(x + 1).get(y).push(attribute);
                 }
             }
@@ -112,6 +111,7 @@ public class Cave {
             LinkedList west = (LinkedList) map.get(x - 1).get(y).clone();
             if(!west.peekFirst().equals("Wumpus") && !west.peekFirst().equals("Gold") && !west.peekFirst().equals("Pit")) {
                 if (!west.peekFirst().equals(attribute)) {
+                    map.get(x - 1).get(y).remove("");
                     map.get(x - 1).get(y).push(attribute);
                 }
             }
@@ -122,6 +122,7 @@ public class Cave {
             LinkedList north = (LinkedList) map.get(x).get(y + 1).clone();
             if(!north.peekFirst().equals("Wumpus") && !north.peekFirst().equals("Gold") && !north.peekFirst().equals("Pit")) {
                 if (!north.peekFirst().equals(attribute)) {
+                    map.get(x).get(y + 1).remove("");
                     map.get(x).get(y + 1).push(attribute);
                 }
             }
@@ -132,44 +133,50 @@ public class Cave {
             LinkedList south = (LinkedList) map.get(x).get(y - 1).clone();
             if (!south.peekFirst().equals("Wumpus") && !south.peekFirst().equals("Gold") && !south.peekFirst().equals("Pit")) {
                 if (!south.peekFirst().equals(attribute)) {
+                    map.get(x).get(y - 1).remove("");
                     map.get(x).get(y - 1).push(attribute);
                 }
             }
         }
     }
 
+    void trackAgent(int[] location, int[] past){
+        map.get(past[0]).get(past[1]).remove("X");
+        map.get(location[0]).get(location[1]).add("X");
+    }
+
     //Done: return location attribute
-    String getAttribute(int[] location){
-        String attribute;
-
-        attribute = map.get(location[0]).get(location[1]).peek();
-
-        return attribute;
-    }
-    public boolean wall(int[] location){
-        return location[0] > this.x || location[1] > this.y || location[0] < 0 || location[1] < 0;
+    LinkedList getAttribute(int[] location){
+        return map.get(location[0]).get(location[1]);
     }
 
-    public void revealCaveFull() {
+    boolean wall(int[] location){
+        return location[0] >= this.x || location[1] >= this.y || location[0] < 0 || location[1] < 0;
+    }
+
+    void revealCaveFull() {
         //complex information heavy print
         //print header row
         for (int x = 0; x < this.x; x++) {
-            System.out.printf("%15s", x);
-            System.out.printf("%19s", "");
+            System.out.printf("%14s", x);
+            System.out.printf("%14s", "");
         }
         System.out.println();
 
         //print cave as table with all values
-        for (int x = 0; x < this.x; x++) {
-            System.out.print(x);
-            for (int y = 0; y < this.y; y++) {
+        for (int y = 0; y < this.x; y++) {
+            System.out.print(y);
+            for (int x = 0; x < this.y; x++) {
                 Object[] item = map.get(x).get(y).toArray();
                 System.out.print("(");
                 for (int i = 0; i < 3; i++) {
                     if (i < item.length) {
-                        System.out.printf("%10s", item[i] + ", ");// + " @ " + x + ", " + y);
+                        System.out.printf("%7s", item[i]);
                     } else {
-                        System.out.printf("%10s", ", ");
+                        System.out.printf("%7s","");
+                    }
+                    if(i<2) {
+                        System.out.print(", ");
                     }
                 }
                 System.out.print(") ");
@@ -178,25 +185,25 @@ public class Cave {
         }
         System.out.println();
     }
-    public void revealCavePretty(){
+    void revealCavePretty(){
         //prettier user friendly print
         //print header row
         for (int x = 0; x < this.x; x++) {
-            System.out.printf("%7s", x);
-            System.out.printf("%6s", "");
+            System.out.printf("%5s", x);
+            System.out.printf("%4s", "");
         }
         System.out.println();
 
         //print cave as table with important items
-        for (int x = 0; x < this.x; x++) {
-            System.out.print(x);
-            for (int y = 0; y < this.y; y++) {
+        for (int y = 0; y < this.x; y++) {
+            System.out.print(y);
+            for (int x = 0; x < this.y; x++) {
                 System.out.print("(");
                 if(map.get(x).get(y).peekFirst().equals("Wumpus") || map.get(x).get(y).peekFirst().equals("Gold") || map.get(x).get(y).peekFirst().equals("Pit")) {
-                    System.out.printf("%10s", map.get(x).get(y).peek());
+                    System.out.printf("%6s", map.get(x).get(y).peek());
                 }
                 else{
-                    System.out.printf("%10s", "");
+                    System.out.printf("%6s", "");
                 }
                 System.out.print(") ");
             }
