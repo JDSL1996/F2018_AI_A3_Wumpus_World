@@ -1,4 +1,5 @@
 import java.util.LinkedList;
+import java.util.List;
 //import java.util.Stack;
 
 public class Cave {
@@ -65,26 +66,26 @@ public class Cave {
             }
         }
 
-        for (int x = 0; x < this.x; x++) {
-            for (int y = 0; y < this.y; y++) {
-                if(x == caveEntrance[0] && y == caveEntrance[1])
-                {
-                    continue;
-                }
-
-                //Done: each place has 20% chance to be pit
-                //decimal number between zero and one
-                float chance = (float)Math.random();
-
-                //20% chance of pit placement
-                //only on empty space
-                if (chance < 0.2 && map.get(x).get(y).peekFirst().equals("")){
-                    map.get(x).get(y).pop();
-                    map.get(x).get(y).push("Pit");
-                    adjacency("Breeze", new int[]{x, y});
-                }
-            }
-        }
+//        for (int x = 0; x < this.x; x++) {
+//            for (int y = 0; y < this.y; y++) {
+//                if(x == caveEntrance[0] && y == caveEntrance[1])
+//                {
+//                    continue;
+//                }
+//
+//                //Done: each place has 20% chance to be pit
+//                //decimal number between zero and one
+//                float chance = (float)Math.random();
+//
+//                //20% chance of pit placement
+//                //only on empty space
+//                if (chance < 0.2 && map.get(x).get(y).peekFirst().equals("")){
+//                    map.get(x).get(y).pop();
+//                    map.get(x).get(y).push("Pit");
+//                    adjacency("Breeze", new int[]{x, y});
+//                }
+//            }
+//        }
     }
 
     private void adjacency(String attribute, int[] location){
@@ -140,31 +141,38 @@ public class Cave {
         }
     }
 
-    void agentCurrent(int[] location, int[] past){
-        map.get(past[0]).get(past[1]).remove("A");
-        map.get(location[0]).get(location[1]).add("A");
+    void agentCurrent(List location, List past){
+        map.get((Integer)past.get(0)).get((Integer)past.get(1)).remove("A");
+        map.get((Integer)location.get(0)).get((Integer)location.get(1)).add("A");
         agentTrail(past);
     }
 
-    void agentTrail(int[] location){
-        map.get(location[0]).get(location[1]).add("X");
+    private void agentTrail(List location){
+        map.get((Integer)location.get(0)).get((Integer)location.get(1)).add("X");
     }
 
     //Done: return location attribute
-    LinkedList getAttribute(int[] location){
-        return map.get(location[0]).get(location[1]);
+    LinkedList getAttribute(List location){
+        return map.get((Integer)location.get(0)).get((Integer)location.get(1));
     }
 
-    boolean wall(int[] location){
-        return location[0] >= this.x || location[1] >= this.y || location[0] < 0 || location[1] < 0;
+    boolean wall(List location){
+        return (Integer)location.get(0) >= this.x || (Integer)location.get(1) >= this.y ||
+                (Integer)location.get(0) < 0 || (Integer)location.get(1) < 0;
     }
 
     void revealCaveFull() {
         //complex information heavy print
+
+        //compass
+        System.out.println("   S  ");
+        System.out.println("E -|- W");
+        System.out.print("   N  ");
+
         //print header row
         for (int x = 0; x < this.x; x++) {
-            System.out.printf("%14s", x);
-            System.out.printf("%14s", "");
+            System.out.printf("%9s", x);
+            System.out.printf("%19s", "");
         }
         System.out.println();
 
@@ -192,6 +200,12 @@ public class Cave {
     }
     void revealCavePretty(){
         //prettier user friendly print
+
+        //compass
+        System.out.println("   S  ");
+        System.out.println("E -|- W");
+        System.out.println("   N  ");
+
         //print header row
         for (int x = 0; x < this.x; x++) {
             System.out.printf("%5s", x);
