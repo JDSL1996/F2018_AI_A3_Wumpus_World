@@ -5,7 +5,6 @@ Create and solve Wumpus caves with AI
 
 ### Interesting choices:
 
-* World item interface: each item uses the same code structure as implemented by an interface for cleaner code
 * world class to hold each cave instance for cleaner code
 
 ### First Order Logic Rules:
