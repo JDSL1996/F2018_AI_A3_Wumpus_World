@@ -13,7 +13,8 @@ public class World {
         Cave c10 = new Cave(10,10);
 
         network[0] = c4;
-        c4.revealCave();
+        c4.revealCaveFull();
+        c4.revealCavePretty();
 //        network[1] = c5;
 //        network[2] = c8;
 //        network[3] = c10;
