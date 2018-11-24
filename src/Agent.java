@@ -6,7 +6,8 @@ public class Agent {
     private Cave cave;
     private List<Integer> standing = new ArrayList<>(2);
     private boolean dead,finished = false;
-    private int glitterSeen = 0;
+    private List<Integer> glitterSeen =  new ArrayList<>(2);
+    private boolean glitterFlag = false;
     private LinkedList<List<Integer>> path = new LinkedList<>();
     private LinkedList<List<Integer>> backtrack = new LinkedList<>();
     private boolean backtracking = false;
@@ -23,6 +24,12 @@ public class Agent {
 
         while(!dead && !finished) {
             choseNextStep();
+        }
+        if(finished){
+            goHome();
+        }
+        if(dead){
+            die();
         }
     }
 
@@ -45,7 +52,8 @@ public class Agent {
                 switch (attribute.toString()) {
                     case "Glitter":
                         report.addLog("So close I can almost taste it! ", attribute.toString(), standing);
-                        glitterSeen += 1;
+                        glitterSeen = standing;
+                        glitterFlag = true;
                         break;
                     case "Smell":
                         report.addLog("Smells funny here. ", attribute.toString(), standing);
@@ -65,7 +73,7 @@ public class Agent {
                         break;
                     case "Gold":
                         report.addLog("Oh, there you are! ", attribute.toString(), standing);
-                        goHome();
+                        finished = true;
                         break;
                     case "A":
                     case "X":
@@ -98,18 +106,33 @@ public class Agent {
             //possible conditions: nothing, gold, pit, wumpus, gold and pit, gold and wumpus, pit and wumpus
 
             //if glitter
-            if (glitterSeen > 0) {
-                pursueGold(glitterSeen);
+            if (glitterFlag) {
+                pursueGold();
+                glitterFlag = false;
             } else {
                 noPlan();
             }
         }
     }
 
-    private void pursueGold(int glitterSoFar){
-        //ready to pick a step
-        boolean choice = false;
+    private void pursueGold(){
+        //if glitter is seen for the second time gold is between
+        if(glitterSeen != standing){
+            /*
+                if standing[0] > glitter[0]
+                    if standing[1] > glitter[1]
+                        gold is either at (standing[0] -1, standing[1]) or (standing[0], standing[1]-1)
+                    else
+                        gold is either at (standing[0] -1, standing[1]) or (standing[0], standing[1]+1)
+                ect ect
+            */
 
+            if(standing.get(0) > glitterSeen.get(0)){
+                if(standing.get(1) > glitterSeen.get(1)){
+                    List<Integer> testStep =
+                }
+            }
+        }
         /*
             if glitter is found with no other items then the gold can be in one of four surrounding spaces
                 if a tested space is completely empty then all spaces around it are safe to check as well
@@ -135,7 +158,7 @@ public class Agent {
          */
 
         //if first glitter and no other options make no plan choice
-        if(report.checkLog(standing).length == 1) {
+        else if(report.checkLog(standing).length == 1) {
             //follow noPlan choice and get that choice for further decision making
             //will return 0 -> 3
             //in order the rest are n,e,s,w
@@ -159,10 +182,9 @@ public class Agent {
                     }
 
                     //here if there are warnings we don't care but we have to check each attribute to find glitter
-                    //we also know there wont be gold so no need to check for it
                     for (String at : report.checkLog(standing)) {
                         //if we didn't get to take a second step skip this part
-                        if(!testTurn){
+                        if(!testTurn && !finished){
                             break;
                         }
                         //if glitter we know gold is around and this will bring us home
@@ -246,17 +268,70 @@ public class Agent {
                         }
                     }
                 }
+                //TODO: backtrack second not safe this is wrong
                 //otherwise its safer to backtrack and try another route, knowing we reduced the search space
-                //TODO: backtrack second not safe
                 else {
-
-                    noPlan();
-//                    stepBack();
-//                    if(firstTurn == 1){
-//                        //turned east but wasn't safe or gold
-//                        //now standing back center only choices left are south and west
-//
-//                    }
+                    stepBack();
+                    if(firstTurn == 1){
+                        //turned east but wasn't safe or gold
+                        //now standing back center only choices left are south and west
+                        boolean testTurn;
+                        //if we can go south do so
+                        testTurn = turn(2);
+                        if(testTurn){
+                            takeStep();
+                            //if the gold wasn't here must be to the west of original
+                            standing = backtrack.peekFirst();
+                            refillPath();
+                            if(!finished){
+                                //brings us center
+                                stepBack();
+                                refillPath();
+                                turn(3);
+                                //get the gold
+                                takeStep();
+                            }
+                        }
+                        //otherwise it must be west
+                        else{
+                            turn(3);
+                            takeStep();
+                        }
+                    }
+                    //only option left is we tried north but it wasn't safe
+                    else{
+                        //now standing back center choices left are east, south and west
+                        boolean testTurn;
+                        //if you can go east try it
+                        testTurn = turn(1);
+                        if(testTurn){
+                            takeStep();
+                        }
+                        //if it wasn't there try south and west again
+                        standing = backtrack.peekFirst();
+                        refillPath();
+                        if(!finished) {
+                            //if we can go south do so
+                            testTurn = turn(2);
+                            if (testTurn) {
+                                takeStep();
+                                //if the gold wasn't here must be to the west of original
+                                if (!finished) {
+                                    //brings us center
+                                    stepBack();
+                                    refillPath();
+                                    turn(3);
+                                    //get the gold
+                                    takeStep();
+                                }
+                            }
+                            //otherwise it must be west
+                            else {
+                                turn(3);
+                                takeStep();
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -297,6 +372,7 @@ public class Agent {
                 }
             }
         }
+        //if no choice backtrack and try again
         if (choice == -1) {
             stepBack();
             noPlan();
@@ -341,23 +417,14 @@ public class Agent {
         return false;
     }
 
-//    private Hashtable recall(int[] location){
-//        Hashtable<int[],String> surroundings = new Hashtable<>();
-//
-//        for(int[] direction: directions){
-//            int[] space = {location[0] + direction[0], location[1] + direction[1]};
-//            String look = report.checkLog(space);
-//            if(look != null) {
-//                surroundings.put(space, look);
-//            }
-//        }
-//
-//        return surroundings;
-//    }
+    private void die(){
+        while(!path.isEmpty()){
+            cave.agentTrail(path.pop());
+        }
+        report.drawCave(cave);
+    }
 
-    //TODO: can hold gold
     private void goHome(){
-        finished = true;
         while(!path.isEmpty()){
             cave.agentTrail(path.pop());
         }

@@ -37,6 +37,9 @@ public class Cave {
                 continue;
             }
 
+            x = 2;
+            y = 2;
+
             map.get(x).get(y).pop();
             map.get(x).get(y).push("Gold");
 
@@ -47,25 +50,36 @@ public class Cave {
 
         placed = false;
 
-//        while (!placed) {
-//            int x = (int) (Math.random() * (this.x -1));
-//            int y = (int) (Math.random() * (this.y -1));
-//
-//            if(x == caveEntrance[0] && y == caveEntrance[1])
-//            {
-//                continue;
-//            }
-//
-//            if (!map.get(x).get(y).peekFirst().equals("Gold")) {
-//                map.get(x).get(y).pop();
-//                map.get(x).get(y).push("Wumpus");
-//
-//                adjacency("Smell", new int[]{x, y});
-//
-//                placed = true;
-//            }
-//        }
+        while (!placed) {
+            int x = (int) (Math.random() * (this.x -1));
+            int y = (int) (Math.random() * (this.y -1));
 
+            if(x == caveEntrance[0] && y == caveEntrance[1])
+            {
+                continue;
+            }
+
+            x = 0;
+            y = 2;
+
+            if (!map.get(x).get(y).peekFirst().equals("Gold")) {
+                map.get(x).get(y).pop();
+                map.get(x).get(y).push("Wumpus");
+
+                adjacency("Smell", new int[]{x, y});
+
+                x = 3;
+                y = 3;
+
+                map.get(x).get(y).pop();
+                map.get(x).get(y).push("Pit");
+
+                adjacency("Breeze", new int[]{x, y});
+
+                placed = true;
+            }
+        }
+//
 //        for (int x = 0; x < this.x; x++) {
 //            for (int y = 0; y < this.y; y++) {
 //                if(x == caveEntrance[0] && y == caveEntrance[1])

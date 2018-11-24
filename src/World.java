@@ -22,6 +22,7 @@ public class World {
     //Done: print a report metric for each cave entered
     void ventureForth(Agent fred){
         for (Cave x: network) {
+            x.revealCavePretty();
             fred.enterCave(x);
             Report report = fred.whatHappened();
             report.printReport();
