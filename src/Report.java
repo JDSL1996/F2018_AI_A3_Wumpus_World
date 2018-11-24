@@ -6,16 +6,26 @@ public class Report {
     //TODO: make and print cave results in an intelligent mannor
     private String caveResult;
     //need to not use array as key as hash value changes per array not per contents
-    private Hashtable<List, String> log = new Hashtable<>();
+    private Hashtable<List, String[]> log = new Hashtable<>();
     private LinkedList<String> logPrint = new LinkedList<>();
     private String[] possibleResult = new String[]{"Gold", "Dead"};
 
     void addLog(String event, String attribute, List location){
         //log the event at a location (assume new location each call)
-        log.put(location, attribute);
+        if(log.containsKey(location)){
+            String[] old = log.get(location);
+            String[] newAttributes = new String[old.length +1];
+            System.arraycopy(old,0,newAttributes,0,old.length-1);
+            newAttributes[newAttributes.length-1] = attribute;
+
+            log.put(location, newAttributes);
+        }else{
+            String[] at = new String[]{attribute};
+            log.put(location, at);
+        }
         logPrint.add("[" + String.valueOf(location.get(0)) + ", " + String.valueOf(location.get(1) + "] " + event));
     }
-    String checkLog(List location){
+    String[] checkLog(List location){
         return log.get(location);
     }
     void readLastEntry(){
@@ -24,6 +34,15 @@ public class Report {
     boolean visited(List location){
         return log.containsKey(location);
     }
+
+    void setResult(String result){
+        caveResult = result;
+    }
+
+    void drawCave(Cave cave){
+        cave.revealCavePretty();
+    }
+
     void printReport(){
         for(Object event: logPrint.toArray()){
             System.out.println(event);

@@ -47,45 +47,45 @@ public class Cave {
 
         placed = false;
 
-        while (!placed) {
-            int x = (int) (Math.random() * (this.x -1));
-            int y = (int) (Math.random() * (this.y -1));
+//        while (!placed) {
+//            int x = (int) (Math.random() * (this.x -1));
+//            int y = (int) (Math.random() * (this.y -1));
+//
+//            if(x == caveEntrance[0] && y == caveEntrance[1])
+//            {
+//                continue;
+//            }
+//
+//            if (!map.get(x).get(y).peekFirst().equals("Gold")) {
+//                map.get(x).get(y).pop();
+//                map.get(x).get(y).push("Wumpus");
+//
+//                adjacency("Smell", new int[]{x, y});
+//
+//                placed = true;
+//            }
+//        }
 
-            if(x == caveEntrance[0] && y == caveEntrance[1])
-            {
-                continue;
-            }
-
-            if (!map.get(x).get(y).peekFirst().equals("Gold")) {
-                map.get(x).get(y).pop();
-                map.get(x).get(y).push("Wumpus");
-
-                adjacency("Smell", new int[]{x, y});
-
-                placed = true;
-            }
-        }
-
-        for (int x = 0; x < this.x; x++) {
-            for (int y = 0; y < this.y; y++) {
-                if(x == caveEntrance[0] && y == caveEntrance[1])
-                {
-                    continue;
-                }
-
-                //Done: each place has 20% chance to be pit
-                //decimal number between zero and one
-                float chance = (float)Math.random();
-
-                //20% chance of pit placement
-                //only on empty space
-                if (chance < 0.2 && map.get(x).get(y).peekFirst().equals("")){
-                    map.get(x).get(y).pop();
-                    map.get(x).get(y).push("Pit");
-                    adjacency("Breeze", new int[]{x, y});
-                }
-            }
-        }
+//        for (int x = 0; x < this.x; x++) {
+//            for (int y = 0; y < this.y; y++) {
+//                if(x == caveEntrance[0] && y == caveEntrance[1])
+//                {
+//                    continue;
+//                }
+//
+//                //Done: each place has 20% chance to be pit
+//                //decimal number between zero and one
+//                float chance = (float)Math.random();
+//
+//                //20% chance of pit placement
+//                //only on empty space
+//                if (chance < 0.2 && map.get(x).get(y).peekFirst().equals("")){
+//                    map.get(x).get(y).pop();
+//                    map.get(x).get(y).push("Pit");
+//                    adjacency("Breeze", new int[]{x, y});
+//                }
+//            }
+//        }
     }
 
     private void adjacency(String attribute, int[] location){
@@ -141,13 +141,7 @@ public class Cave {
         }
     }
 
-    void agentCurrent(List location, List past){
-        map.get((Integer)past.get(0)).get((Integer)past.get(1)).remove("A");
-        map.get((Integer)location.get(0)).get((Integer)location.get(1)).add("A");
-        agentTrail(past);
-    }
-
-    private void agentTrail(List location){
+    void agentTrail(List location){
         map.get((Integer)location.get(0)).get((Integer)location.get(1)).add("X");
     }
 
@@ -218,8 +212,11 @@ public class Cave {
             System.out.print(y);
             for (int x = 0; x < this.x; x++) {
                 System.out.print("(");
-                if(map.get(x).get(y).peekFirst().equals("Wumpus") || map.get(x).get(y).peekFirst().equals("Gold") || map.get(x).get(y).peekFirst().equals("Pit")) {
-                    System.out.printf("%6s", map.get(x).get(y).peek());
+                LinkedList show = map.get(x).get(y);
+                if(show.peekFirst().equals("Wumpus") || show.peekFirst().equals("Gold") || show.peekFirst().equals("Pit")) {
+                    System.out.printf("%6s", show.peek());
+                }else if(show.peekLast().equals("X")){
+                    System.out.printf("%6s", show.peekLast());
                 }
                 else{
                     System.out.printf("%6s", "");

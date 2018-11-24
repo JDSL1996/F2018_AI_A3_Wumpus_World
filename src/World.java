@@ -25,7 +25,6 @@ public class World {
             x.revealCavePretty();
             fred.enterCave(x);
             Report report = fred.whatHappened();
-
             report.printReport();
         }
     }
