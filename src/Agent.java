@@ -56,10 +56,12 @@ public class Agent {
                     case "Wumpus":
                         report.addLog("Shit. ", attribute.toString(), standing);
                         dead = true;
+                        report.setResult("The report just ends there..... and is that... is that blood??", stepCount);
                         break;
                     case "Pit":
                         report.addLog("YAAAAAH-WHO-WHO-WHOEY! ", attribute.toString(), standing);
                         dead = true;
+                        report.setResult("The report just ends there.....", stepCount);
                         break;
                     case "Gold":
                         report.addLog("Oh, there you are! ", attribute.toString(), standing);
@@ -360,6 +362,7 @@ public class Agent {
             cave.agentTrail(path.pop());
         }
         report.drawCave(cave);
+        report.setResult("Got the Gold, Home safe for the night.", stepCount);
     }
 
     //agent sends in report
