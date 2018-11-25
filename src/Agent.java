@@ -108,6 +108,8 @@ public class Agent {
             //if glitter
             if (glitterFlag) {
                 pursueGold();
+
+
                 glitterFlag = false;
             } else {
                 noPlan();
@@ -117,7 +119,8 @@ public class Agent {
 
     private void pursueGold(){
         //if glitter is seen for the second time gold is between
-        if(glitterSeen != standing){
+        if(glitterSeen.get(0) != standing.get(0) && glitterSeen.get(1) != standing.get(1)){
+            System.out.println("here");
             /*
                 if standing[0] > glitter[0]
                     if standing[1] > glitter[1]
@@ -127,9 +130,74 @@ public class Agent {
                 ect ect
             */
 
+            //if standing further east
             if(standing.get(0) > glitterSeen.get(0)){
-                if(standing.get(1) > glitterSeen.get(1)){
-                    List<Integer> testStep =
+                //if standing further north
+                if(standing.get(1) > glitterSeen.get(1)) {
+                    //check south
+                    boolean testStep = turn(2);
+                    //if south was available
+                    if (testStep) {
+                        takeStep();
+                        if (!finished || !dead) {
+                            stepBack();
+                            refillPath();
+                        }
+                    }
+                }
+                //if standing further south
+                else{
+                    //check north
+                    boolean testStep = turn(0);
+                    //if north was available
+                    if (testStep) {
+                        takeStep();
+                        if (!finished || !dead) {
+                            stepBack();
+                            refillPath();
+                        }
+                    }
+                }
+                //if neither of those worked the gold is to the west
+                if (!finished || ! dead){
+                    //at this point the gold has to be west so west has to be a valid move
+                    turn(3);
+                    takeStep();
+                }
+            }
+            //if standing further west
+            else{
+                //if standing further north
+                if(standing.get(1) > glitterSeen.get(1)) {
+                    //check south
+                    boolean testStep = turn(2);
+                    //if south was available
+                    if (testStep) {
+                        takeStep();
+                        if (!finished || !dead) {
+                            stepBack();
+                            refillPath();
+                        }
+                    }
+                }
+                //if standing further south
+                else{
+                    //check north
+                    boolean testStep = turn(0);
+                    //if north was available
+                    if (testStep) {
+                        takeStep();
+                        if (!finished || !dead) {
+                            stepBack();
+                            refillPath();
+                        }
+                    }
+                }
+                //if neither of those worked the gold is to the east
+                if (!finished || ! dead){
+                    //at this point the gold has to be east so east has to be a valid move
+                    turn(1);
+                    takeStep();
                 }
             }
         }
@@ -271,67 +339,68 @@ public class Agent {
                 //TODO: backtrack second not safe this is wrong
                 //otherwise its safer to backtrack and try another route, knowing we reduced the search space
                 else {
-                    stepBack();
-                    if(firstTurn == 1){
-                        //turned east but wasn't safe or gold
-                        //now standing back center only choices left are south and west
-                        boolean testTurn;
-                        //if we can go south do so
-                        testTurn = turn(2);
-                        if(testTurn){
-                            takeStep();
-                            //if the gold wasn't here must be to the west of original
-                            standing = backtrack.peekFirst();
-                            refillPath();
-                            if(!finished){
-                                //brings us center
-                                stepBack();
-                                refillPath();
-                                turn(3);
-                                //get the gold
-                                takeStep();
-                            }
-                        }
-                        //otherwise it must be west
-                        else{
-                            turn(3);
-                            takeStep();
-                        }
-                    }
-                    //only option left is we tried north but it wasn't safe
-                    else{
-                        //now standing back center choices left are east, south and west
-                        boolean testTurn;
-                        //if you can go east try it
-                        testTurn = turn(1);
-                        if(testTurn){
-                            takeStep();
-                        }
-                        //if it wasn't there try south and west again
-                        standing = backtrack.peekFirst();
-                        refillPath();
-                        if(!finished) {
-                            //if we can go south do so
-                            testTurn = turn(2);
-                            if (testTurn) {
-                                takeStep();
-                                //if the gold wasn't here must be to the west of original
-                                if (!finished) {
-                                    //brings us center
-                                    stepBack();
-                                    refillPath();
-                                    turn(3);
-                                    //get the gold
-                                    takeStep();
-                                }
-                            }
-                            //otherwise it must be west
-                            else {
-                                turn(3);
-                                takeStep();
-                            }
-                        }
-                    }
+                    noPlan();
+//                    stepBack();
+//                    if(firstTurn == 1){
+//                        //turned east but wasn't safe or gold
+//                        //now standing back center only choices left are south and west
+//                        boolean testTurn;
+//                        //if we can go south do so
+//                        testTurn = turn(2);
+//                        if(testTurn){
+//                            takeStep();
+//                            //if the gold wasn't here must be to the west of original
+//                            standing = backtrack.peekFirst();
+//                            refillPath();
+//                            if(!finished){
+//                                //brings us center
+//                                stepBack();
+//                                refillPath();
+//                                turn(3);
+//                                //get the gold
+//                                takeStep();
+//                            }
+//                        }
+//                        //otherwise it must be west
+//                        else{
+//                            turn(3);
+//                            takeStep();
+//                        }
+//                    }
+//                    //only option left is we tried north but it wasn't safe
+//                    else{
+//                        //now standing back center choices left are east, south and west
+//                        boolean testTurn;
+//                        //if you can go east try it
+//                        testTurn = turn(1);
+//                        if(testTurn){
+//                            takeStep();
+//                        }
+//                        //if it wasn't there try south and west again
+//                        standing = backtrack.peekFirst();
+//                        refillPath();
+//                        if(!finished) {
+//                            //if we can go south do so
+//                            testTurn = turn(2);
+//                            if (testTurn) {
+//                                takeStep();
+//                                //if the gold wasn't here must be to the west of original
+//                                if (!finished) {
+//                                    //brings us center
+//                                    stepBack();
+//                                    refillPath();
+//                                    turn(3);
+//                                    //get the gold
+//                                    takeStep();
+//                                }
+//                            }
+//                            //otherwise it must be west
+//                            else {
+//                                turn(3);
+//                                takeStep();
+//                            }
+//                        }
+//                    }
                 }
             }
         }

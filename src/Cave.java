@@ -71,15 +71,15 @@ public class Cave {
                 x = 3;
                 y = 3;
 
-                map.get(x).get(y).pop();
-                map.get(x).get(y).push("Pit");
-
-                adjacency("Breeze", new int[]{x, y});
+//                map.get(x).get(y).pop();
+//                map.get(x).get(y).push("Pit");
+//
+//                adjacency("Breeze", new int[]{x, y});
 
                 placed = true;
             }
         }
-//
+
 //        for (int x = 0; x < this.x; x++) {
 //            for (int y = 0; y < this.y; y++) {
 //                if(x == caveEntrance[0] && y == caveEntrance[1])
