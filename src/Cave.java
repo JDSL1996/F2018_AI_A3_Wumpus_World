@@ -37,8 +37,8 @@ public class Cave {
                 continue;
             }
 
-            x = 2;
-            y = 2;
+//            x = 0;
+//            y = 1;
 
             map.get(x).get(y).pop();
             map.get(x).get(y).push("Gold");
@@ -59,8 +59,8 @@ public class Cave {
                 continue;
             }
 
-            x = 0;
-            y = 2;
+//            x = 0;
+//            y = 2;
 
             if (!map.get(x).get(y).peekFirst().equals("Gold")) {
                 map.get(x).get(y).pop();
@@ -68,8 +68,8 @@ public class Cave {
 
                 adjacency("Smell", new int[]{x, y});
 
-                x = 3;
-                y = 3;
+//                x = 3;
+//                y = 3;
 
 //                map.get(x).get(y).pop();
 //                map.get(x).get(y).push("Pit");
@@ -80,26 +80,26 @@ public class Cave {
             }
         }
 
-//        for (int x = 0; x < this.x; x++) {
-//            for (int y = 0; y < this.y; y++) {
-//                if(x == caveEntrance[0] && y == caveEntrance[1])
-//                {
-//                    continue;
-//                }
-//
-//                //Done: each place has 20% chance to be pit
-//                //decimal number between zero and one
-//                float chance = (float)Math.random();
-//
-//                //20% chance of pit placement
-//                //only on empty space
-//                if (chance < 0.2 && map.get(x).get(y).peekFirst().equals("")){
-//                    map.get(x).get(y).pop();
-//                    map.get(x).get(y).push("Pit");
-//                    adjacency("Breeze", new int[]{x, y});
-//                }
-//            }
-//        }
+        for (int x = 0; x < this.x; x++) {
+            for (int y = 0; y < this.y; y++) {
+                if(x == caveEntrance[0] && y == caveEntrance[1])
+                {
+                    continue;
+                }
+
+                //Done: each place has 20% chance to be pit
+                //decimal number between zero and one
+                float chance = (float)Math.random();
+
+                //20% chance of pit placement
+                //only on empty space
+                if (chance < 0.2 && map.get(x).get(y).peekFirst().equals("")){
+                    map.get(x).get(y).pop();
+                    map.get(x).get(y).push("Pit");
+                    adjacency("Breeze", new int[]{x, y});
+                }
+            }
+        }
     }
 
     private void adjacency(String attribute, int[] location){

@@ -47,6 +47,7 @@ public class Report {
 
     void printReport(){
         cave.revealCavePretty();
+        System.out.println("The report reads as follows:");
         for(Object event: logPrint.toArray()){
             System.out.println(event);
         }
