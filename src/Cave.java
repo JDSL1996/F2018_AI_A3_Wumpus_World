@@ -25,6 +25,7 @@ public class Cave {
 
     //Done: fill cave
     private void initializeCave(){
+        boolean hasWump = true, hasPit = true;
         boolean placed = false;
 
         //Done: random place for gold/Wumpus
@@ -37,9 +38,6 @@ public class Cave {
                 continue;
             }
 
-//            x = 0;
-//            y = 1;
-
             map.get(x).get(y).pop();
             map.get(x).get(y).push("Gold");
 
@@ -50,53 +48,44 @@ public class Cave {
 
         placed = false;
 
-        while (!placed) {
-            int x = (int) (Math.random() * (this.x -1));
-            int y = (int) (Math.random() * (this.y -1));
+        if(hasWump) {
+            while (!placed) {
+                int x = (int) (Math.random() * (this.x - 1));
+                int y = (int) (Math.random() * (this.y - 1));
 
-            if(x == caveEntrance[0] && y == caveEntrance[1])
-            {
-                continue;
-            }
-
-//            x = 0;
-//            y = 2;
-
-            if (!map.get(x).get(y).peekFirst().equals("Gold")) {
-                map.get(x).get(y).pop();
-                map.get(x).get(y).push("Wumpus");
-
-                adjacency("Smell", new int[]{x, y});
-
-//                x = 3;
-//                y = 3;
-
-//                map.get(x).get(y).pop();
-//                map.get(x).get(y).push("Pit");
-//
-//                adjacency("Breeze", new int[]{x, y});
-
-                placed = true;
-            }
-        }
-
-        for (int x = 0; x < this.x; x++) {
-            for (int y = 0; y < this.y; y++) {
-                if(x == caveEntrance[0] && y == caveEntrance[1])
-                {
+                if (x == caveEntrance[0] && y == caveEntrance[1]) {
                     continue;
                 }
 
-                //Done: each place has 20% chance to be pit
-                //decimal number between zero and one
-                float chance = (float)Math.random();
-
-                //20% chance of pit placement
-                //only on empty space
-                if (chance < 0.2 && map.get(x).get(y).peekFirst().equals("")){
+                if (!map.get(x).get(y).peekFirst().equals("Gold")) {
                     map.get(x).get(y).pop();
-                    map.get(x).get(y).push("Pit");
-                    adjacency("Breeze", new int[]{x, y});
+                    map.get(x).get(y).push("Wumpus");
+
+                    adjacency("Smell", new int[]{x, y});
+
+                    placed = true;
+                }
+            }
+        }
+
+        if(hasPit) {
+            for (int x = 0; x < this.x; x++) {
+                for (int y = 0; y < this.y; y++) {
+                    if (x == caveEntrance[0] && y == caveEntrance[1]) {
+                        continue;
+                    }
+
+                    //Done: each place has 20% chance to be pit
+                    //decimal number between zero and one
+                    float chance = (float) Math.random();
+
+                    //20% chance of pit placement
+                    //only on empty space
+                    if (chance < 0.2 && map.get(x).get(y).peekFirst().equals("")) {
+                        map.get(x).get(y).pop();
+                        map.get(x).get(y).push("Pit");
+                        adjacency("Breeze", new int[]{x, y});
+                    }
                 }
             }
         }
@@ -155,18 +144,18 @@ public class Cave {
         }
     }
 
-    void agentTrail(List location){
-        map.get((Integer)location.get(0)).get((Integer)location.get(1)).add("X");
+    void agentTrail(Coord location){
+        map.get(location.get(0)).get(location.get(1)).add("X");
     }
 
     //Done: return location attribute
-    LinkedList getAttribute(List location){
-        return map.get((Integer)location.get(0)).get((Integer)location.get(1));
+    LinkedList getAttribute(Coord location){
+        return map.get(location.get(0)).get(location.get(1));
     }
 
-    boolean wall(List location){
-        return (Integer)location.get(0) >= this.x || (Integer)location.get(1) >= this.y ||
-                (Integer)location.get(0) < 0 || (Integer)location.get(1) < 0;
+    boolean wall(Coord location){
+        return location.get(0) >= this.x || location.get(1) >= this.y ||
+                location.get(0) < 0 || location.get(1) < 0;
     }
 
     void revealCaveFull() {

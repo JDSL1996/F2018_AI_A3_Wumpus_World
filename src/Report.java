@@ -8,10 +8,10 @@ public class Report {
     private int stepsTaken;
     private Cave cave;
     //need to not use array as key as hash value changes per array not per contents
-    private Hashtable<List, String[]> log = new Hashtable<>();
+    private Hashtable<Coord, String[]> log = new Hashtable<>();
     private LinkedList<String> logPrint = new LinkedList<>();
 
-    void addLog(String event, String attribute, List location){
+    void addLog(String event, String attribute, Coord location){
         //log the event at a location (assume new location each call)
         if(log.containsKey(location)){
             String[] old = log.get(location);
@@ -26,13 +26,13 @@ public class Report {
         }
         logPrint.add("[" + String.valueOf(location.get(0)) + ", " + String.valueOf(location.get(1) + "] " + event));
     }
-    String[] checkLog(List location){
+    String[] checkLog(Coord location){
         return log.get(location);
     }
     void readLastEntry(){
         System.out.println("log: " + logPrint.peekLast());
     }
-    boolean visited(List location){
+    boolean visited(Coord location){
         return log.containsKey(location);
     }
 
@@ -52,6 +52,6 @@ public class Report {
             System.out.println(event);
         }
         System.out.println("Agent has steps taken marked as: " + stepsTaken);
-        System.out.println(caveResult);
+        System.out.println(caveResult + "\n");
     }
 }

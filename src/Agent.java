@@ -3,13 +3,14 @@ import java.util.*;
 public class Agent {
     private Report report;
     private Cave cave;
-    private List<Integer> standing;
+    private Coord standing;
     private boolean dead,finished;
-    private LinkedList<List<Integer>> glitterSeen;
-    private boolean glitterFlag;
-    private LinkedList<List<Integer>> path;
-    private LinkedList<List<Integer>> backtrack;
-    private boolean backtracking;
+    private LinkedList<Coord> glitterSeen;
+    private boolean glitterFlag, wumpFlag, breezy;
+    private int breezCount;
+    private LinkedList<Coord> path;
+    private LinkedList<Coord> backtrack;
+    private boolean backtracking, ignore;
     private int stepCount;
 
     //Done: can enter cave
@@ -17,18 +18,19 @@ public class Agent {
         //initialize things
         this.cave = cave;
         report = new Report();
-        standing  = new ArrayList<>(2);
         dead = false;
         finished = false;
-        glitterSeen =  new LinkedList<>();
+        glitterSeen = new LinkedList<>();
         glitterFlag = false;
         path = new LinkedList<>();
         backtrack = new LinkedList<>();
         backtracking = false;
         stepCount = 0;
+        wumpFlag = false;
+        breezy = false;
+        breezCount = 0;
 
-        standing.add(1);
-        standing.add(1);
+        standing = new Coord(1,1);
 
         System.out.println("Ok, Here goes nothing....");
         System.out.println("**************************");
@@ -63,18 +65,26 @@ public class Agent {
             //take a feel and report it
             LinkedList feel = sense();
             for (Object attribute : feel.toArray()) {
-                boolean ignore = false;
                 switch (attribute.toString()) {
                     case "Glitter":
                         report.addLog("So close I can almost taste it! ", attribute.toString(), standing);
-                        glitterFlag = true;
-                        glitterSeen.push(standing);
+                        if(!ignore) {
+                            glitterFlag = true;
+                            glitterSeen.push(standing);
+                        }
                         break;
                     case "Smell":
                         report.addLog("Smells funny here. ", attribute.toString(), standing);
+                        if(!ignore) {
+                            wumpFlag = true;
+                        }
                         break;
                     case "Breeze":
                         report.addLog("Do you feel that? ", attribute.toString(), standing);
+                        if(!ignore) {
+                            breezy = true;
+                            breezCount++;
+                        }
                         break;
                     case "Wumpus":
                         report.addLog("Shit. ", attribute.toString(), standing);
@@ -92,7 +102,6 @@ public class Agent {
                         break;
                     case "A":
                     case "X":
-                        ignore = true;
                         break;
                     default:
                         report.addLog("Man, it's really dark in here. Hope this is legible. ", attribute.toString(), standing);
@@ -117,21 +126,49 @@ public class Agent {
             //TODO: choice order: not die, get gold
             //possible conditions: nothing, gold, pit, wumpus, gold and pit, gold and wumpus, pit and wumpus
 
+            if(breezy){
+                ignore = true;
+                avoidFall();
+                ignore = false;
+                breezy = false;
+            }
             //if glitter
-            if (glitterFlag) {
+            else if (glitterFlag) {
+                ignore = true;
                 pursueGold();
+                ignore = false;
                 glitterFlag = false;
-            } else {
+            }
+//            else if (wumpFlag){
+//
+//            }
+            else {
                 noPlan();
             }
         }
     }
 
+    private void avoidFall(){
+        //if we find a breeze and we have taken more steps than breeze found
+        //we can basically run to a safe place and try again
+        //we want to figure out the direction that brought us here and go the next direction instead
+        //since the place with the breeze is now marked this set up is already accomplished in the noPlan method
+        //(which tries to move to an unopened space and if it cannot just moves to the first available
+        if(stepCount > breezCount + 1){
+            stepBack();
+            stepBack();
+            noPlan();
+            refillPath();
+        }
+        //otherwise there's not allot to be done so.....
+        else {
+            noPlan();
+        }
+
+    }
     private void pursueGold(){
         //if glitter is seen for the second time gold is between
         if(glitterSeen.size() > 1) {
-//            if (!glitterSeen.get(0).equals(standing.get(0)) || !glitterSeen.get(1).equals(standing.get(1))) {
-                System.out.println("here");
             /*
                 if standing[0] > glitter[0]
                     if standing[1] > glitter[1]
@@ -145,7 +182,6 @@ public class Agent {
                 if (standing.get(0) > glitterSeen.get(glitterSeen.size() - 1).get(0)) {
                     //if standing further north
                     if (standing.get(1) > glitterSeen.get(glitterSeen.size() - 1).get(1)) {
-                        System.out.println("here2");
                         //check south
                         boolean testStep = turn(2);
                         //if south was available
@@ -275,6 +311,9 @@ public class Agent {
 
                     //here if there are warnings we don't care but we have to check each attribute to find glitter
                     for (String at : report.checkLog(standing)) {
+                        if(at == null){
+                            continue;
+                        }
                         //if we didn't get to take a second step skip this part
                         if(!testTurn || finished){
                             break;
@@ -325,8 +364,11 @@ public class Agent {
                             //here we are standing nw of original glitter
                             //here if there are warnings we don't care but we have to check each attribute to find glitter
                             for (String at : report.checkLog(standing)) {
+                                if(at == null){
+                                    continue;
+                                }
                                 //if we couldn't move west skip checking west
-                                if(!testTurn || finished){
+                                if (!testTurn || finished) {
                                     break;
                                 }
                                 //if glitter we know gold is around and this will bring us home
@@ -366,9 +408,8 @@ public class Agent {
                 //Done: backtrack second not safe this is wrong
                 //otherwise its safer to backtrack and try another route, knowing we reduced the search space
                 else {
-                    //get back to glitter, stop backtracking
+                    //get back to glitter
                     stepBack();
-                    refillPath();
                     if(firstTurn == 1){
                         //turned east but wasn't safe or gold
                         //now standing back center only choices left are south and west
@@ -376,10 +417,13 @@ public class Agent {
                         //if we can go south do so
                         testTurn = turn(2);
                         if(testTurn){
+                            //if the turn is valid stop backtracking and make the turn
+                            refillPath();
                             takeStep();
                             //if the gold wasn't here must be to the west of original
                             if(!finished){
                                 //brings us center
+                                stepBack();
                                 stepBack();
                                 refillPath();
                                 turn(3);
@@ -389,7 +433,6 @@ public class Agent {
                         }
                         //otherwise it must be west
                         else{
-                            standing = path.peek();
                             turn(3);
                             takeStep();
                         }
@@ -402,9 +445,6 @@ public class Agent {
                         testTurn = turn(1);
                         if(testTurn){
                             takeStep();
-                        }
-                        else {
-                            standing = path.peek();
                         }
                         //if it wasn't there try south and west again
                         if(!finished) {
@@ -427,7 +467,6 @@ public class Agent {
                             }
                             //otherwise it must be west
                             else {
-                                standing = path.peek();
                                 turn(3);
                                 takeStep();
                             }
@@ -451,17 +490,15 @@ public class Agent {
     private int noPlan(){
         //Done: might loop around a space and get trapped, find a way to fix (visited every node in surrounding area)
         //if not enough information, test direction array until a choice can be made
-
         int choice = -1;
         for (int turn = 0; turn < 4; turn++) {
             //if turn was a valid move (not wall)
             if (turn(turn)) {
-                //if we haven't been here yet (turn changes standing) and this is the first outer loop
+                //if we haven't been here yet (turn changes standing)
                 if (!report.visited(standing)) {
                     // if this choice was made as a result of backtracking
                     if(backtracking){
                         refillPath();
-                        //current step choice will be added after this call ends
                     }
                     //choice made so take step and stop choosing (soft break)
                     choice = turn;
@@ -486,6 +523,7 @@ public class Agent {
             backtrack.push(path.pop());
         }
         standing = path.pop();
+        report.addLog("Had to go back", "", standing);
         backtrack.push(standing);
         backtracking = true;
     }
@@ -502,12 +540,9 @@ public class Agent {
         //n,e,s,w
         int[][] directions = {{0,1}, {1,0}, {0,-1}, {-1,0}};
 
-        List<Integer> step = new ArrayList<>(2);
-
         //if the request is legitimate
         if(dir < directions.length && dir > -1) {
-            step.add(standing.get(0) + directions[dir][0]);
-            step.add(standing.get(1) + directions[dir][1]);
+            Coord step = new Coord(standing.get(0) + directions[dir][0], standing.get(1) + directions[dir][1]);
 
             //if the choice is not a wall
             if (!cave.wall(step)) {
