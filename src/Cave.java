@@ -38,10 +38,20 @@ public class Cave {
                 continue;
             }
 
+//            x = 2;
+//            y = 2;
+
             map.get(x).get(y).pop();
             map.get(x).get(y).push("Gold");
 
             adjacency("Glitter", new int[]{x, y});
+
+//            x = 0;
+//            y = 3;
+//
+//            map.get(x).get(y).pop();
+//            map.get(x).get(y).push("Pit");
+//            adjacency("Breeze", new int[]{x, y});
 
             placed = true;
         }

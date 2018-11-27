@@ -45,7 +45,7 @@ public class Agent {
         if(finished){
             goHome();
         }
-        if(dead){
+        else{
             die();
         }
     }
@@ -126,14 +126,14 @@ public class Agent {
             //TODO: choice order: not die, get gold
             //possible conditions: nothing, gold, pit, wumpus, gold and pit, gold and wumpus, pit and wumpus
 
-            if(breezy){
-                ignore = true;
-                avoidFall();
-                ignore = false;
-                breezy = false;
-            }
-            //if glitter
-            else if (glitterFlag) {
+//            if(breezy){
+//                ignore = true;
+//                avoidFall();
+//                ignore = false;
+//                breezy = false;
+//            }
+            //else if glitter
+            if (glitterFlag) {
                 ignore = true;
                 pursueGold();
                 ignore = false;
@@ -154,8 +154,7 @@ public class Agent {
         //we want to figure out the direction that brought us here and go the next direction instead
         //since the place with the breeze is now marked this set up is already accomplished in the noPlan method
         //(which tries to move to an unopened space and if it cannot just moves to the first available
-        if(stepCount > breezCount + 1){
-            stepBack();
+        if(stepCount > breezCount){
             stepBack();
             noPlan();
             refillPath();
@@ -165,6 +164,32 @@ public class Agent {
             noPlan();
         }
 
+    }
+    private void secondGlitter(){
+        boolean testStep;
+        //if standing further north
+        if (standing.get(1) > glitterSeen.get(glitterSeen.size() - 1).get(1)) {
+            //check south
+            testStep = turn(2);
+        }
+        //if standing further south
+        else {
+            //check north
+            testStep = turn(0);
+        }
+        //if space was available take the step
+        if (testStep) {
+            takeStep();
+            //if it didn't work (or kill us) step back to try the next direction
+            if (!finished || !dead) {
+                stepBack();
+                refillPath();
+            }
+        }
+        //otherwise fix where were standing
+        else {
+            standing = path.peek();
+        }
     }
     private void pursueGold(){
         //if glitter is seen for the second time gold is between
@@ -178,85 +203,28 @@ public class Agent {
                 ect ect
             */
 
-                //if standing further east
-                if (standing.get(0) > glitterSeen.get(glitterSeen.size() - 1).get(0)) {
-                    //if standing further north
-                    if (standing.get(1) > glitterSeen.get(glitterSeen.size() - 1).get(1)) {
-                        //check south
-                        boolean testStep = turn(2);
-                        //if south was available
-                        if (testStep) {
-                            takeStep();
-                            if (!finished || !dead) {
-                                stepBack();
-                                refillPath();
-                            }
-                        } else {
-                            standing = path.peek();
-                        }
-                    }
-                    //if standing further south
-                    else {
-                        //check north
-                        boolean testStep = turn(0);
-                        //if north was available
-                        if (testStep) {
-                            takeStep();
-                            if (!finished || !dead) {
-                                stepBack();
-                                refillPath();
-                            }
-                        } else {
-                            standing = path.peek();
-                        }
-                    }
-                    //if neither of those worked the gold is to the west
-                    if (!finished || !dead) {
-                        //at this point the gold has to be west so west has to be a valid move
-                        turn(3);
-                        takeStep();
-                    }
+            //if standing further east
+            if (standing.get(0) > glitterSeen.get(glitterSeen.size() - 1).get(0)) {
+                //check north or south
+                secondGlitter();
+                //if neither of those worked the gold is to the west
+                if (!finished || !dead) {
+                    //at this point the gold has to be west so west has to be a valid move
+                    turn(3);
+                    takeStep();
                 }
-                //if standing further west
-                else {
-                    //if standing further north
-                    if (standing.get(1) > glitterSeen.get(glitterSeen.size() - 1).get(1)) {
-                        //check south
-                        boolean testStep = turn(2);
-                        //if south was available
-                        if (testStep) {
-                            takeStep();
-                            if (!finished || !dead) {
-                                stepBack();
-                                refillPath();
-                            }
-                        } else {
-                            standing = path.peek();
-                        }
-                    }
-                    //if standing further south
-                    else {
-                        //check north
-                        boolean testStep = turn(0);
-                        //if north was available
-                        if (testStep) {
-                            takeStep();
-                            if (!finished || !dead) {
-                                stepBack();
-                                refillPath();
-                            }
-                        } else {
-                            standing = path.peek();
-                        }
-                    }
-                    //if neither of those worked the gold is to the east
-                    if (!finished || !dead) {
-                        //at this point the gold has to be east so east has to be a valid move
-                        turn(1);
-                        takeStep();
-                    }
+            }
+            //if standing further west
+            else {
+                //check north or south
+                secondGlitter();
+                //if neither of those worked the gold is to the east
+                if (!finished || !dead) {
+                    //at this point the gold has to be east so east has to be a valid move
+                    turn(1);
+                    takeStep();
                 }
-//            }
+            }
         }
         /*
             if glitter is found with no other items then the gold can be in one of four surrounding spaces
