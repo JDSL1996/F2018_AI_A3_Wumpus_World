@@ -6,7 +6,7 @@ public class Agent {
     private Coord standing;
     private boolean dead,finished;
     private LinkedList<Coord> glitterSeen;
-    private boolean glitterFlag, wumpFlag, breezy;
+    private boolean glitterFlag, hazard;
     private int breezCount;
     private LinkedList<Coord> path;
     private LinkedList<Coord> backtrack;
@@ -26,8 +26,7 @@ public class Agent {
         backtrack = new LinkedList<>();
         backtracking = false;
         stepCount = 0;
-        wumpFlag = false;
-        breezy = false;
+        hazard = false;
         breezCount = 0;
 
         standing = new Coord(0,0);
@@ -74,13 +73,13 @@ public class Agent {
                     case "Smell":
                         report.addLog("Smells funny here. ", attribute.toString(), standing);
                         if(!ignore) {
-                            wumpFlag = true;
+                            hazard = true;
                         }
                         break;
                     case "Breeze":
                         report.addLog("Do you feel that? ", attribute.toString(), standing);
                         if(!ignore) {
-                            breezy = true;
+                            hazard = true;
                             breezCount++;
                         }
                         break;
@@ -124,9 +123,9 @@ public class Agent {
             //TODO: choice order: not die, get gold
             //possible conditions: nothing, gold, pit, wumpus, gold and pit, gold and wumpus, pit and wumpus
 
-            if(wumpFlag){
-                avoidWumpus();
-                wumpFlag = false;
+            if(hazard){
+                avoid();
+                hazard = false;
             }
 //            if(breezy){
 //                ignore = true;
@@ -147,12 +146,12 @@ public class Agent {
         }
     }
 
-    private void avoidWumpus(){
+    private void avoid(){
         Coord firstSmell = standing;
         for(int turn = 0; turn < 4; turn++){
             boolean testTurn = turn(turn);
             if(testTurn && !report.visited(standing)){
-                report.addLog("Possible Wumpus","???", standing);
+                report.addLog("Possible Danger","???", standing);
             }
             standing = firstSmell;
         }
