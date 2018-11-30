@@ -37,8 +37,6 @@ public class Agent {
 
         takeStep();
 
-        path.push(standing);
-
         while(!dead && !finished) {
             choseNextStep();
         }
@@ -126,6 +124,10 @@ public class Agent {
             //TODO: choice order: not die, get gold
             //possible conditions: nothing, gold, pit, wumpus, gold and pit, gold and wumpus, pit and wumpus
 
+            if(wumpFlag){
+                avoidWumpus();
+                wumpFlag = false;
+            }
 //            if(breezy){
 //                ignore = true;
 //                avoidFall();
@@ -133,19 +135,30 @@ public class Agent {
 //                breezy = false;
 //            }
             //else if glitter
-            if (glitterFlag) {
+            else if (glitterFlag) {
                 ignore = true;
                 pursueGold();
                 ignore = false;
                 glitterFlag = false;
             }
-//            else if (wumpFlag){
-//
-//            }
             else {
                 noPlan();
             }
         }
+    }
+
+    private void avoidWumpus(){
+        Coord firstSmell = standing;
+        for(int turn = 0; turn < 4; turn++){
+            boolean testTurn = turn(turn);
+            if(testTurn && !report.visited(standing)){
+                report.addLog("Possible Wumpus","???", standing);
+            }
+            standing = firstSmell;
+        }
+        stepBack();
+        refillPath();
+        noPlan();
     }
 
     private void avoidFall(){
@@ -501,6 +514,7 @@ public class Agent {
         while(!backtrack.isEmpty()){
             path.push(backtrack.pop());
         }
+        path.push(standing);
         backtracking = false;
     }
 

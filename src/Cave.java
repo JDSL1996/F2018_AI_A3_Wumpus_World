@@ -25,7 +25,7 @@ public class Cave {
 
     //Done: fill cave
     private void initializeCave(){
-        boolean hasWump = true, hasPit = true;
+        boolean hasWump = true, hasPit = false;
         boolean placed = false;
 
         //Done: random place for gold/Wumpus
@@ -38,8 +38,8 @@ public class Cave {
                 continue;
             }
 
-//            x = 2;
-//            y = 2;
+//            x = 0;
+//            y = 3;
 
             map.get(x).get(y).pop();
             map.get(x).get(y).push("Gold");
@@ -67,6 +67,8 @@ public class Cave {
                     continue;
                 }
 
+//                x = 0;
+//                y = 2;
                 if (!map.get(x).get(y).peekFirst().equals("Gold")) {
                     map.get(x).get(y).pop();
                     map.get(x).get(y).push("Wumpus");
