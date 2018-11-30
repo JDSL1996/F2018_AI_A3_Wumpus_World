@@ -1,6 +1,5 @@
+import java.util.ArrayList;
 import java.util.Hashtable;
-import java.util.LinkedList;
-import java.util.List;
 
 public class Report {
     //TODO: make and print cave results in an intelligent mannor
@@ -9,7 +8,7 @@ public class Report {
     private Cave cave;
     //need to not use array as key as hash value changes per array not per contents
     private Hashtable<Coord, String[]> log = new Hashtable<>();
-    private LinkedList<String> logPrint = new LinkedList<>();
+    private ArrayList<String> logPrint = new ArrayList<>();
 
     void addLog(String event, String attribute, Coord location){
         //log the event at a location (assume new location each call)
@@ -29,9 +28,6 @@ public class Report {
     String[] checkLog(Coord location){
         return log.get(location);
     }
-    void readLastEntry(){
-        System.out.println("log: " + logPrint.peekLast());
-    }
     boolean visited(Coord location){
         return log.containsKey(location);
     }
@@ -48,7 +44,7 @@ public class Report {
     void printReport(){
         cave.revealCavePretty();
         System.out.println("The report reads as follows:");
-        for(Object event: logPrint.toArray()){
+        for(Object event: logPrint){
             System.out.println(event);
         }
         System.out.println("Agent has steps taken marked as: " + stepsTaken);

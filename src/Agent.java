@@ -30,7 +30,7 @@ public class Agent {
         breezy = false;
         breezCount = 0;
 
-        standing = new Coord(1,1);
+        standing = new Coord(0,0);
 
         System.out.println("Ok, Here goes nothing....");
         System.out.println("**************************");

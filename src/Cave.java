@@ -7,7 +7,7 @@ public class Cave {
     private int x,y;
     //map = list of lists: of lists that contain strings
     private LinkedList<LinkedList<LinkedList<String>>> map = new LinkedList<>();
-    private int[] caveEntrance = new int[]{1,1};
+    private int[] caveEntrance = new int[]{0,0};
 
     Cave(int x, int y){
         this.x = x;
