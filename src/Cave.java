@@ -216,27 +216,33 @@ public class Cave {
         //print header row
         for (int x = 0; x < this.x; x++) {
             System.out.printf("%5s", x);
-            System.out.printf("%4s", "");
+            System.out.printf("%2s", "");
         }
         System.out.println();
 
         //print cave as table with important items
         for (int y = this.y-1; y > -1; y--) {
             System.out.print(y);
-            for (int x = 0; x < this.x; x++) {
-                System.out.print("(");
-                LinkedList show = map.get(x).get(y);
-                if(show.peekFirst().equals("Wumpus") || show.peekFirst().equals("Gold") || show.peekFirst().equals("Pit")) {
-                    System.out.printf("%6s", show.peek());
-                }else if(show.peekLast().equals("X")){
-                    System.out.printf("%6s", show.peekLast());
-                }
-                else{
-                    System.out.printf("%6s", "");
-                }
-                System.out.print(") ");
+            int x = 0;
+            for (x = 0; x < this.x-1; x++) {
+                System.out.print("|");
+                printHelp(x,y);
             }
+            System.out.print("|");
+            printHelp(x,y);
+            System.out.print("| ");
             System.out.println();
+        }
+    }
+    private void printHelp(int x, int y){
+        LinkedList show = map.get(x).get(y);
+        if(show.peekFirst().equals("Wumpus") || show.peekFirst().equals("Gold") || show.peekFirst().equals("Pit")) {
+            System.out.printf("%6s", show.peek());
+        }else if(show.peekLast().equals("X")){
+            System.out.printf("%6s", show.peekLast());
+        }
+        else{
+            System.out.printf("%6s", "");
         }
     }
 
