@@ -146,12 +146,21 @@ public class Agent {
         }
     }
 
+    private void removeFlags(){
+        Coord clean = standing;
+        for(int turn = 0; turn < 4; turn++){
+            if(turn(turn)){
+                report.removeFlag(standing);
+            }
+            standing = clean;
+        }
+    }
+
     private void avoid(){
         Coord firstSmell = standing;
         for(int turn = 0; turn < 4; turn++){
-            boolean testTurn = turn(turn);
-            if(testTurn && !report.visited(standing)){
-                report.addLog("Possible Danger","???", standing);
+            if(turn(turn) && !report.visited(standing)){
+                report.setFlag(standing);
             }
             standing = firstSmell;
         }
@@ -475,7 +484,7 @@ public class Agent {
             //if turn was a valid move (not wall)
             if (turn(turn)) {
                 //if we haven't been here yet (turn changes standing)
-                if (!report.visited(standing)) {
+                if (!report.visited(standing) && !report.getFlag(standing)) {
                     // if this choice was made as a result of backtracking
                     if(backtracking){
                         refillPath();
@@ -499,22 +508,26 @@ public class Agent {
     }
 
     private void stepBack(){
-        if(!backtracking) {
-            backtrack.push(path.pop());
+        if(path.size() > 1) {
+            if (!backtracking) {
+                backtrack.push(path.pop());
+            }
+            standing = path.pop();
+            report.addLog("Had to go back", "", standing);
+            backtrack.push(standing);
+            backtracking = true;
         }
-        standing = path.pop();
-        report.addLog("Had to go back", "", standing);
-        backtrack.push(standing);
-        backtracking = true;
     }
 
     private void refillPath(){
-        //refill path with old moves (will be in order as backtrack was reversed order (FILO method)
-        while(!backtrack.isEmpty()){
-            path.push(backtrack.pop());
+        if(backtracking) {
+            //refill path with old moves (will be in order as backtrack was reversed order (FILO method)
+            while (!backtrack.isEmpty()) {
+                path.push(backtrack.pop());
+            }
+            path.push(standing);
+            backtracking = false;
         }
-        path.push(standing);
-        backtracking = false;
     }
 
     private boolean turn(int dir){

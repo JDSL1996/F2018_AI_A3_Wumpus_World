@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Hashtable;
 
 public class Report {
@@ -8,6 +9,7 @@ public class Report {
     private Cave cave;
     //need to not use array as key as hash value changes per array not per contents
     private Hashtable<Coord, String[]> log = new Hashtable<>();
+    private HashSet<Coord> flagMap = new HashSet<>();
     private ArrayList<String> logPrint = new ArrayList<>();
 
     void addLog(String event, String attribute, Coord location){
@@ -31,7 +33,18 @@ public class Report {
     boolean visited(Coord location){
         return log.containsKey(location);
     }
-
+    void setFlag (Coord location){
+        flagMap.add(location);
+//        logPrint.add("[" + String.valueOf(location.get(0)) + ", " + String.valueOf(location.get(1) + "] " + "Possible Danger"));
+    }
+    void removeFlag(Coord location){
+        if(flagMap.contains(location)){
+            flagMap.remove(location);
+        }
+    }
+    boolean getFlag(Coord location){
+        return flagMap.contains(location);
+    }
     void setResult(String result, int steps){
         caveResult = result;
         stepsTaken = steps;
