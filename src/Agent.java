@@ -501,8 +501,15 @@ public class Agent {
         }
         //if no choice backtrack and try again
         if (choice == -1) {
-            stepBack();
-            noPlan();
+            if(path.size()>1) {
+                stepBack();
+                noPlan();
+            }
+            else{
+                refillPath();
+                turn(0);
+                takeStep();
+            }
         }
         return choice;
     }

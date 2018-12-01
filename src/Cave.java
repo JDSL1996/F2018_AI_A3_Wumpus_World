@@ -25,7 +25,7 @@ public class Cave {
 
     //Done: fill cave
     private void initializeCave(){
-        boolean hasWump = true, hasPit = false;
+        boolean hasWump = true, hasPit = true;
         boolean placed = false;
 
         //Done: random place for gold/Wumpus
