@@ -1,251 +1,266 @@
-import java.util.LinkedList;
-import java.util.List;
 //import java.util.Stack;
 
+import java.util.Random;
+
 public class Cave {
-    //Done: make cave with passed size
-    private int x,y;
-    //map = list of lists: of lists that contain strings
-    private LinkedList<LinkedList<LinkedList<String>>> map = new LinkedList<>();
-    private int[] caveEntrance = new int[]{0,0};
 
-    Cave(int x, int y){
-        this.x = x;
-        this.y = y;
+    //
+    //member variables
+    //
 
-        for(int i=0; i < x; i++){
-            map.add(new LinkedList<>());
-            for(int j=0; j < y; j++){
-                map.get(i).add(new LinkedList<>());
-                map.get(i).get(j).push("");
-            }
-        }
-        initializeCave();
+    //the width of this cave
+    private final int width;
+    //the height of this cave
+    private final int height;
+    //the cave data for each tile
+    private final Tile[][] map;
+    //the random instance for this cave
+    private Random random;
+
+    //
+    //constructors
+    //
+
+    //creates an instance of cave with provided width and height
+    public Cave(int width, int height, int seed)
+    {//begin Cave
+        //
+        //initialize member variables
+        //
+        this.width = width;
+        this.height = height;
+        map = new Tile[width][height];
+        random = new Random(seed);
+        //initialize map data
+        initialize();
+        //place the tiles on the map
+        placeTiles();
+    }//end Cave
+
+    //
+    //methods
+    //
+
+
+    public Tile startingPositon()
+    {
+        return map[0][0];
     }
 
-    //Done: fill cave
-    private void initializeCave(){
-        boolean hasWump = true, hasPit = false;
-        boolean placed = false;
-
-        //Done: random place for gold/Wumpus
-        while (!placed) {
-            int x = (int) (Math.random() * (this.x -1));
-            int y = (int) (Math.random() * (this.y -1));
-
-            if(x == caveEntrance[0] && y == caveEntrance[1])
+    //initializes the map data
+    private void initialize()
+    {//begin initialize
+        //
+        //initialize map
+        //
+        for (int y = 0; y < this.height; y++)
+        {
+            for (int x = 0; x < this.width; x++)
             {
-                continue;
+                map[x][y] = new Tile(x, y, TileType.unExplored);
             }
-
-//            x = 0;
-//            y = 3;
-
-            map.get(x).get(y).pop();
-            map.get(x).get(y).push("Gold");
-
-            adjacency("Glitter", new int[]{x, y});
-
-//            x = 0;
-//            y = 3;
-//
-//            map.get(x).get(y).pop();
-//            map.get(x).get(y).push("Pit");
-//            adjacency("Breeze", new int[]{x, y});
-
-            placed = true;
         }
+        //
+        //setup neighbors
+        //
+        for (int y = 0; y < this.height; y++)
+        {
+            for (int x = 0; x < this.width; x++)
+            {
+                addNeighbors(map[x][y]);
+            }
+        }
+    }//end initialize
 
-        placed = false;
+    private void placeTiles()
+    {
+        //place gold
+        placeRandomTile(TileType.gold);
+        //place wumpas
+        placeRandomTile(TileType.wumpas);
 
-        if(hasWump) {
-            while (!placed) {
-                int x = (int) (Math.random() * (this.x - 1));
-                int y = (int) (Math.random() * (this.y - 1));
+        //place pits
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                Tile currentTile = map[x][y];
 
-                if (x == caveEntrance[0] && y == caveEntrance[1]) {
+                if(currentTile == startingPositon())
                     continue;
-                }
 
-//                x = 0;
-//                y = 2;
-                if (!map.get(x).get(y).peekFirst().equals("Gold")) {
-                    map.get(x).get(y).pop();
-                    map.get(x).get(y).push("Wumpus");
 
-                    adjacency("Smell", new int[]{x, y});
+                if(currentTile.getType() == TileType.unExplored && isReachable(currentTile))
+                {
+                    float chance = random.nextFloat();
 
-                    placed = true;
-                }
-            }
-        }
+                    if(chance < 0.20f)
+                    {
+                        currentTile.setType(TileType.pit);
 
-        if(hasPit) {
-            for (int x = 0; x < this.x; x++) {
-                for (int y = 0; y < this.y; y++) {
-                    if (x == caveEntrance[0] && y == caveEntrance[1]) {
-                        continue;
+                        for (Tile neighbor : currentTile.getNeighbors())
+                        {
+                            if(isReachable(neighbor))
+                            {
+                                if(neighbor.getType() == TileType.unExplored && neighbor != startingPositon())
+                                    neighbor.setType(TileType.breeze);
+
+                            }
+                        }
                     }
 
-                    //Done: each place has 20% chance to be pit
-                    //decimal number between zero and one
-                    float chance = (float) Math.random();
-
-                    //20% chance of pit placement
-                    //only on empty space
-                    if (chance < 0.2 && map.get(x).get(y).peekFirst().equals("")) {
-                        map.get(x).get(y).pop();
-                        map.get(x).get(y).push("Pit");
-                        adjacency("Breeze", new int[]{x, y});
-                    }
                 }
             }
         }
     }
 
-    private void adjacency(String attribute, int[] location){
-        //check adjacent exists in map
-        //if exists and empty, add attribute
-        int x = location[0];
-        int y = location[1];
 
-        //agent can only move up left down right so only need attributes there
-        //east
-        if ((x + 1) < this.x){
-            //'shallow clone' items are not cloned just pointers
-            LinkedList east = (LinkedList) map.get(x + 1).get(y).clone();
-            if (!east.peekFirst().equals("Wumpus") && !east.peekFirst().equals("Gold") && !east.peekFirst().equals("Pit")) {
-                if(!east.peekFirst().equals(attribute)){
-                    map.get(x + 1).get(y).remove("");
-                    map.get(x + 1).get(y).push(attribute);
-                }
-            }
-        }
-        //west
-        if ((x - 1) > -1){
-            //'shallow clone' items are not cloned just pointers
-            LinkedList west = (LinkedList) map.get(x - 1).get(y).clone();
-            if(!west.peekFirst().equals("Wumpus") && !west.peekFirst().equals("Gold") && !west.peekFirst().equals("Pit")) {
-                if (!west.peekFirst().equals(attribute)) {
-                    map.get(x - 1).get(y).remove("");
-                    map.get(x - 1).get(y).push(attribute);
-                }
-            }
-        }
-        //north
-        if ((y + 1) < this.y){
-            //'shallow clone' items are not cloned just pointers
-            LinkedList north = (LinkedList) map.get(x).get(y + 1).clone();
-            if(!north.peekFirst().equals("Wumpus") && !north.peekFirst().equals("Gold") && !north.peekFirst().equals("Pit")) {
-                if (!north.peekFirst().equals(attribute)) {
-                    map.get(x).get(y + 1).remove("");
-                    map.get(x).get(y + 1).push(attribute);
-                }
-            }
-        }
-        //south
-        if ((y - 1) > -1){
-            //'shallow clone' items are not cloned just pointers
-            LinkedList south = (LinkedList) map.get(x).get(y - 1).clone();
-            if (!south.peekFirst().equals("Wumpus") && !south.peekFirst().equals("Gold") && !south.peekFirst().equals("Pit")) {
-                if (!south.peekFirst().equals(attribute)) {
-                    map.get(x).get(y - 1).remove("");
-                    map.get(x).get(y - 1).push(attribute);
-                }
-            }
-        }
+
+    private void placeRandomTile(TileType tileType)
+    {
+        //
+        //initialize local variables
+        //
+        int attempts = 0;
+        boolean isPlaced = false;
+        final int mapSize = width * height;
+
+        //run while there is no placement or the attempts is less than the size of the map
+        while (isPlaced == false || attempts > mapSize)
+        {//begin while
+            //The positional data for placement
+            int xPosition = random.nextInt(width);
+            int yPosition = random.nextInt(height);
+
+            //The tile to place
+            Tile selectedTile = map[xPosition][yPosition];
+
+            //if the selected tile is not the start, check neighbors
+            if(selectedTile != startingPositon() && selectedTile.getType() == TileType.unExplored)
+            {//begin if
+                    if(isReachable(selectedTile))
+                    {//begin if
+
+                        //place the tile
+                        map[selectedTile.getX()][selectedTile.getY()].setType(tileType);
+
+                        //if tileType is wumpas, then ass smell to neighbors
+                        if(tileType == TileType.wumpas)
+                        {
+                            for (Tile neighbor : selectedTile.getNeighbors())
+                            {
+                                //if neighbor is unexplored, then mark as stink
+                                if(neighbor.getType() == TileType.unExplored)
+                                    neighbor.setType(TileType.stink);
+                            }
+                        }
+                        //successfully placed
+                        isPlaced = true;
+                    }//end if
+            }//end if
+            //count attempt
+            attempts++;
+        }//end while
     }
 
-    void agentTrail(Coord location){
-        map.get(location.get(0)).get(location.get(1)).add("X");
+    private boolean isReachable(Tile tile)
+    {//begin isReachable
+        //store the number of unexplored tiles neighboring the selected tile
+        int unexploredTileCount = 0;
+
+        //check all neighbors
+        for (Tile neighbor : tile.getNeighbors())
+        {//begin for
+            //if tile is unexplored, then count it
+            if(neighbor.getType() == TileType.unExplored)
+                unexploredTileCount++;
+        }//end for
+
+        //if the number of unexplored neighbors is greater than 1 then it is reachable
+        if(unexploredTileCount > 1)
+            return true;
+        else
+            return false;
+    }//end isReachable
+
+    //adds all neighboring tiles
+    //parameters:
+    //tile = the tile to add neighbors to
+    private void addNeighbors(Tile tile)
+    {//begin addNeigbors
+        //
+        //get the position of the tile
+        //
+        int x = tile.getX();
+        int y = tile.getY();
+
+        //check west
+        if(isBounded(x - 1, y))
+            tile.addNeighbor(map[x - 1][y], Direction.west);
+        //check east
+        if(isBounded(x + 1, y))
+            tile.addNeighbor(map[x + 1][y], Direction.east);
+        //check south
+        if(isBounded(x, y + 1))
+            tile.addNeighbor(map[x][y + 1], Direction.south);
+        //check north
+        if(isBounded(x, y - 1))
+            tile.addNeighbor(map[x][y - 1], Direction.north);
+    }//end addNeigbors
+
+    private boolean isBounded(int x, int y)
+    {
+        //if x is NOT found on the map return false
+        if(x < 0 || x >= width)
+            return false;
+        //if y is NOT found on the map return false
+        if(y < 0 || y >= height)
+            return false;
+
+        //found - return true
+        return true;
     }
 
-    //Done: return location attribute
-    LinkedList getAttribute(Coord location){
-        return map.get(location.get(0)).get(location.get(1));
-    }
+    public void display()
+    {
+        for (int y = 0; y < this.height; y++)
+        {
+            for (int x = 0; x < this.width; x++)
+            {
+                Tile currentTile = map[x][y];
+                TileType currentType = currentTile.getType();
 
-    boolean wall(Coord location){
-        return location.get(0) >= this.x || location.get(1) >= this.y ||
-                location.get(0) < 0 || location.get(1) < 0;
-    }
+                char tile = ' ';
 
-    void revealCaveFull() {
-        //complex information heavy print
-
-        //compass
-        System.out.println("   N  ");
-        System.out.println("W -|- E");
-        System.out.print("   S  ");
-
-        //print header row
-        for (int x = 0; x < this.x; x++) {
-            System.out.printf("%9s", x);
-            System.out.printf("%19s", "");
-        }
-        System.out.println();
-
-        //print cave as table with all values
-        for (int y = this.y-1; y > -1; y--) {
-            System.out.print(y);
-            for (int x = 0; x < this.x; x++) {
-                Object[] item = map.get(x).get(y).toArray();
-                System.out.print("(");
-                for (int i = 0; i < 3; i++) {
-                    if (i < item.length) {
-                        System.out.printf("%7s", item[i]);
-                    } else {
-                        System.out.printf("%7s","");
-                    }
-                    if(i<2) {
-                        System.out.print(", ");
-                    }
+                switch (currentType)
+                {
+                    case unExplored:
+                        tile = ' ';
+                        break;
+                    case explored:
+                        tile = 'X';
+                        break;
+                    case gold:
+                        tile = 'G';
+                        break;
+                    case wumpas:
+                        tile = 'W';
+                        break;
+                    case stink:
+                        tile = 'S';
+                        break;
+                    case breeze:
+                        tile = 'B';
+                        break;
+                    case pit:
+                        tile = 'P';
+                        break;
                 }
-                System.out.print(") ");
+
+                System.out.print("( " + tile + " )");
+                System.out.print("\t");
             }
             System.out.println();
         }
-        System.out.println();
     }
-    void revealCavePretty(){
-        //prettier user friendly print
-
-        //compass
-        System.out.println("   N  ");
-        System.out.println("W -|- E");
-        System.out.println("   S  ");
-
-        //print header row
-        for (int x = 0; x < this.x; x++) {
-            System.out.printf("%5s", x);
-            System.out.printf("%2s", "");
-        }
-        System.out.println();
-
-        //print cave as table with important items
-        for (int y = this.y-1; y > -1; y--) {
-            System.out.print(y);
-            int x = 0;
-            for (x = 0; x < this.x-1; x++) {
-                System.out.print("|");
-                printHelp(x,y);
-            }
-            System.out.print("|");
-            printHelp(x,y);
-            System.out.print("| ");
-            System.out.println();
-        }
-    }
-    private void printHelp(int x, int y){
-        LinkedList show = map.get(x).get(y);
-        if(show.peekFirst().equals("Wumpus") || show.peekFirst().equals("Gold") || show.peekFirst().equals("Pit")) {
-            System.out.printf("%6s", show.peek());
-        }else if(show.peekLast().equals("X")){
-            System.out.printf("%6s", show.peekLast());
-        }
-        else{
-            System.out.printf("%6s", "");
-        }
-    }
-
 }

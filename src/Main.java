@@ -1,20 +1,13 @@
 public class Main {
     public static void main(String args[]){
-        /*
-            Done: create and store multiple caves @ 4,5,8,10
+        Cave cave1 = new Cave(4, 4, 0);
+        Cave cave2 = new Cave(5, 5, 10);
+        Cave cave3 = new Cave(8, 8, 0);
+        Cave cave4 = new Cave(10, 10, 0);
 
-            TODO: create ai player
-
-            TODO: get game run report of end, entered cells, performance measure
-         */
-
-        // create the ai agent
-        Agent fred = new Agent();
-        //create the world (cave network)
-        World world = new World();
-
-        //send agent to explore caves
-        world.ventureForth(fred);
-
+        Player player = new Player();
+        player.enterCave(cave4);
+        cave4.display();
+        player.displayLog();
     }
 }
